@@ -1,3 +1,4 @@
+using DG.Tweening;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
@@ -6,41 +7,64 @@ using UnityEngine.UIElements;
 public class BallManager : MonoBehaviour
 {
     public GameObject cam;
-    Vector3 distanceToCamera;
     public GameObject target;
-    float h = 25;
+    Vector3 distanceToCamera;
+    Vector3 displacementXZ;
+    Vector3 positionControl;
+    Vector3 velocityY;
+    Vector3 velocityXZ;
+
+
+    float h;
+    public float time;
     float gravity = -18;
-    float positionControl;
+    float displacementY;
+    
 
     public bool debugPath;
+    public bool constantHMax;
+    public bool constantFlightTime;
+    bool canJump=true;
 
     private void OnEnable()
     {
         EventManager.PositionAdjustment += PositionAdjustment;
         EventManager.StartLineRenderer += StartLineRenderer;
+        EventManager.ConstantHMax += ConstantHMax;
     }
     private void OnDisable()
     {
         EventManager.PositionAdjustment -= PositionAdjustment;
         EventManager.StartLineRenderer -= StartLineRenderer;
+        EventManager.ConstantHMax -= ConstantHMax;
+    }
+    void ConstantHMax()
+    {
+        h = 10;
     }
 
     void StartLineRenderer()
     {
+        //if (!canJump)
+        //{
+        //    transform.GetComponent<Rigidbody>().velocity = Vector3.zero;
+        //}
         cam.transform.position = transform.position - distanceToCamera;
+        
     }
 
     void PositionAdjustment()
     {
         CalculateH();
         TargetPos();
-        Throw();
+        //Throw();
+        FlightTimeController();
     }
 
     void Start()
     {
         distanceToCamera = transform.position - cam.transform.position;
-        positionControl = transform.position.y;
+        positionControl = transform.position;
         transform.GetComponent<Rigidbody>().useGravity = false;
         DrawPath();
 
@@ -48,14 +72,29 @@ public class BallManager : MonoBehaviour
 
     void Update()
     {
-        if (Input.GetMouseButton(0))
+        if (Input.GetMouseButtonDown(0) && canJump)
         {
+            transform.GetComponent<Rigidbody>().drag = 0;
             EventManager.PositionAdjustment();
+            canJump= false;
             
         }
-        if (transform.position.y == positionControl)
+
+        if (Input.GetMouseButtonUp(0))
         {
+            EventManager.PositionAdjustment();
+            canJump = false;
+        }
+
+        if (transform.position.y == positionControl.y && !canJump && transform.position != positionControl)
+        {
+            positionControl= transform.position;
+            transform.GetComponent<Rigidbody>().drag = 50;
+            //transform.GetComponent<Rigidbody>().velocity = new Vector3(0, 0, 0);
+            transform.position = positionControl;
             EventManager.StartLineRenderer();
+            //transform.GetComponent<Rigidbody>().drag = 0;
+            canJump = true;
         }
 
         if (debugPath)
@@ -72,7 +111,7 @@ public class BallManager : MonoBehaviour
         if (Physics.Raycast(r, out hit))
         {
             Vector3 objectHit = hit.point;
-            target.transform.position = objectHit;
+            target.transform.position = new Vector3(objectHit.x, 0.5f, objectHit.z);
         }
     }
 
@@ -85,16 +124,35 @@ public class BallManager : MonoBehaviour
 
     void CalculateH()
     {
-        h = Mathf.Abs(target.transform.position.z - transform.position.z)/2;
+        if (constantHMax)
+        {
+            EventManager.ConstantHMax();
+        }
+        else
+        {
+            h = Mathf.Abs(target.transform.position.z - transform.position.z) / 2;
+        }
+    }
+
+    void FlightTimeController()
+    {
+        if (constantFlightTime)
+        {
+            transform.DOJump(target.transform.position, h, 1, time);
+        }
+        else
+        {
+            Throw();
+        }
     }
 
     ThrowhData CalculateThrowhData()
     {
-        float displacementY = target.transform.position.y - transform.position.y;
-        Vector3 displacementXZ = new Vector3(target.transform.position.x - transform.position.x, 0, target.transform.position.z - transform.position.z);
-        float time = Mathf.Sqrt(-2 * h / gravity) + Mathf.Sqrt(2 * (displacementY - h) / gravity);
-        Vector3 velocityY = Vector3.up * Mathf.Sqrt(-2 * gravity * h);
-        Vector3 velocityXZ = displacementXZ / time;
+        displacementY = target.transform.position.y - transform.position.y;
+        displacementXZ = new Vector3(target.transform.position.x - transform.position.x, 0, target.transform.position.z - transform.position.z);
+        time = Mathf.Sqrt(-2 * h / gravity) + Mathf.Sqrt(2 * (displacementY - h) / gravity);
+        velocityY = Vector3.up * Mathf.Sqrt(-2 * gravity * h);
+        velocityXZ = displacementXZ / time;
 
         return new ThrowhData(velocityXZ + velocityY * -Mathf.Sign(gravity), time);
     }

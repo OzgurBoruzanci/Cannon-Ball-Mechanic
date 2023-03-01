@@ -12,32 +12,43 @@ public class DrawPath : MonoBehaviour
     Vector3 endPoint;
     Camera cam;
 
+    bool constantHMax=true;
+
     private void OnEnable()
     {
         EventManager.PositionAdjustment += PositionAdjustment;
         EventManager.StartLineRenderer += StartLineRenderer;
+        EventManager.ConstantHMax += ConstantHMax;
     }
     private void OnDisable()
     {
         EventManager.PositionAdjustment -= PositionAdjustment;
         EventManager.StartLineRenderer -= StartLineRenderer;
+        EventManager.ConstantHMax -= ConstantHMax;
+    }
+
+    void ConstantHMax()
+    {
+        constantHMax= true;
     }
 
     void StartLineRenderer()
     {
         startPoint = ball.transform.position;
-        EndPointPos();
-        CalculateHMaxPoint();
-        Debug.Log("ss");
+        //EndPointPos();
+        DrawQuadraticBezierCurve(startPoint, CalculateHMaxPoint(startPoint, EndPointPos()), EndPointPos());
     }
 
     void PositionAdjustment()
     {
-        //startPoint = ball.transform.position;
+       // startPoint = ball.transform.position;
+       ///* EndPointPos()*/;
+       // CalculateHMaxPoint(startPoint, EndPointPos());
     }
 
     void Start()
     {
+        startPoint = ball.transform.position;
         cam = Camera.main;
         lineRenderer = GetComponent<LineRenderer>();
     }
@@ -45,21 +56,32 @@ public class DrawPath : MonoBehaviour
     void Update()
     {
         
-        startPoint = ball.transform.position;
+        
         EndPointPos();
-        CalculateHMaxPoint();
+        //CalculateHMaxPoint();
 
-        DrawQuadraticBezierCurve(startPoint, hMaxPoint, endPoint);
+        DrawQuadraticBezierCurve(startPoint, CalculateHMaxPoint(startPoint,EndPointPos()), EndPointPos());
     }
 
-    void CalculateHMaxPoint()
+    Vector3 CalculateHMaxPoint(Vector3 startPoint,Vector3 endPoint)
     {
-        hMaxPoint.y = Mathf.Abs(endPoint.z - startPoint.z);
-        hMaxPoint.x = (endPoint.x - startPoint.x) / 2;
-        hMaxPoint.z = Mathf.Abs(endPoint.z - startPoint.z) / 2;
+        if (constantHMax)
+        {
+            hMaxPoint.y = 20;
+            hMaxPoint.x = ((endPoint.x - startPoint.x) / 2)+startPoint.x;
+            hMaxPoint.z = (Mathf.Abs(endPoint.z - startPoint.z) / 2)+startPoint.z;
+        }
+        else
+        {
+            hMaxPoint.y = Mathf.Abs(endPoint.z - startPoint.z);
+            hMaxPoint.x = (endPoint.x - startPoint.x) / 2;
+            hMaxPoint.z = Mathf.Abs(endPoint.z - startPoint.z) / 2;
+        }
+        Debug.Log(hMaxPoint);
+        return hMaxPoint;
     }
 
-    void EndPointPos()
+    Vector3 EndPointPos()
     {
         RaycastHit hit;
         Ray r = cam.ScreenPointToRay(Input.mousePosition);
@@ -68,6 +90,7 @@ public class DrawPath : MonoBehaviour
             Vector3 objectHit = hit.point;
             endPoint = objectHit;
         }
+        return endPoint;
     }
 
     void DrawQuadraticBezierCurve(Vector3 point0, Vector3 point1, Vector3 point2)

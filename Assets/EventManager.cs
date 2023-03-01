@@ -7,4 +7,5 @@ public static class EventManager
 
     public static Action PositionAdjustment;
     public static Action StartLineRenderer;
+    public static Action ConstantHMax;
 }

@@ -1,4 +1,5 @@
 using DG.Tweening;
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
@@ -15,7 +16,7 @@ public class BallManager : MonoBehaviour
     Vector3 velocityXZ;
 
 
-    float h;
+    public float height;
     public float time;
     float gravity = -18;
     float displacementY;
@@ -40,7 +41,7 @@ public class BallManager : MonoBehaviour
     }
     void ConstantHMax()
     {
-        h = 10;
+        
     }
 
     void StartLineRenderer()
@@ -57,8 +58,8 @@ public class BallManager : MonoBehaviour
     {
         CalculateH();
         TargetPos();
-        //Throw();
-        FlightTimeController();
+        Throw();
+        //FlightTimeController();
     }
 
     void Start()
@@ -101,7 +102,14 @@ public class BallManager : MonoBehaviour
         {
             DrawPath();
         }
-        
+        if (constantHMax)
+        {
+            constantFlightTime = false;
+        }
+        if (constantFlightTime)
+        {
+            constantHMax = false;
+        }
     }
 
     void TargetPos()
@@ -120,9 +128,10 @@ public class BallManager : MonoBehaviour
         Physics.gravity = Vector3.up * gravity;
         transform.GetComponent<Rigidbody>().useGravity = true;
         transform.GetComponent<Rigidbody>().velocity = CalculateThrowhData().initialVelocity;
+
     }
 
-    void CalculateH()
+    float CalculateH()
     {
         if (constantHMax)
         {
@@ -130,29 +139,36 @@ public class BallManager : MonoBehaviour
         }
         else
         {
-            h = Mathf.Abs(target.transform.position.z - transform.position.z) / 2;
+            height = Mathf.Abs(target.transform.position.z - transform.position.z) / 2;
         }
+        return height;
     }
 
-    void FlightTimeController()
-    {
-        if (constantFlightTime)
-        {
-            transform.DOJump(target.transform.position, h, 1, time);
-        }
-        else
-        {
-            Throw();
-        }
-    }
 
     ThrowhData CalculateThrowhData()
     {
-        displacementY = target.transform.position.y - transform.position.y;
-        displacementXZ = new Vector3(target.transform.position.x - transform.position.x, 0, target.transform.position.z - transform.position.z);
-        time = Mathf.Sqrt(-2 * h / gravity) + Mathf.Sqrt(2 * (displacementY - h) / gravity);
-        velocityY = Vector3.up * Mathf.Sqrt(-2 * gravity * h);
-        velocityXZ = displacementXZ / time;
+        //displacementY = target.transform.position.y - transform.position.y;
+        //displacementXZ = new Vector3(target.transform.position.x - transform.position.x, 0, target.transform.position.z - transform.position.z);
+        //time = FlightTimeController();
+        //velocityY = Vector3.up * Mathf.Sqrt(-2 * gravity * CalculateH());
+        //velocityXZ = displacementXZ / time;
+
+        if (constantFlightTime)
+        {
+            displacementY = target.transform.position.y - transform.position.y;
+            displacementXZ = new Vector3(target.transform.position.x - transform.position.x, 0, target.transform.position.z - transform.position.z);
+            height = -gravity * (time / 2) * (time / 2);
+            velocityY = Vector3.up * -gravity * (time / 2);
+            velocityXZ = displacementXZ / time;
+        }
+        else
+        {
+            displacementY = target.transform.position.y - transform.position.y;
+            displacementXZ = new Vector3(target.transform.position.x - transform.position.x, 0, target.transform.position.z - transform.position.z);
+            time = Mathf.Sqrt(-2 * CalculateH() / gravity) + Mathf.Sqrt(2 * (displacementY - CalculateH()) / gravity);
+            velocityY = Vector3.up * Mathf.Sqrt(-2 * gravity * CalculateH());
+            velocityXZ = displacementXZ / time;
+        }
 
         return new ThrowhData(velocityXZ + velocityY * -Mathf.Sign(gravity), time);
     }

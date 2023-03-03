@@ -12,7 +12,7 @@ public class DrawPath : MonoBehaviour
     Vector3 endPoint;
     Camera cam;
 
-    bool constantHMax=true;
+    public bool constantHMax=true;
 
     private void OnEnable()
     {
@@ -77,7 +77,6 @@ public class DrawPath : MonoBehaviour
             hMaxPoint.x = (endPoint.x - startPoint.x) / 2;
             hMaxPoint.z = Mathf.Abs(endPoint.z - startPoint.z) / 2;
         }
-        Debug.Log(hMaxPoint);
         return hMaxPoint;
     }
 

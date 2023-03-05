@@ -32,34 +32,33 @@ public class BallManager : MonoBehaviour
         EventManager.PositionAdjustment += PositionAdjustment;
         EventManager.StartLineRenderer += StartLineRenderer;
         EventManager.ConstantHMax += ConstantHMax;
+        EventManager.NotConstantTime += NotConstantTime;
     }
     private void OnDisable()
     {
         EventManager.PositionAdjustment -= PositionAdjustment;
         EventManager.StartLineRenderer -= StartLineRenderer;
         EventManager.ConstantHMax -= ConstantHMax;
+        EventManager.NotConstantTime -= NotConstantTime;
+    }
+    void NotConstantTime()
+    {
+
     }
     void ConstantHMax()
     {
         
     }
 
-    void StartLineRenderer()
+    void StartLineRenderer(Vector3 startVec,float height,Vector3 endVec)
     {
-        //if (!canJump)
-        //{
-        //    transform.GetComponent<Rigidbody>().velocity = Vector3.zero;
-        //}
-        cam.transform.position = transform.position - distanceToCamera;
         
     }
 
     void PositionAdjustment()
     {
-        CalculateH();
         TargetPos();
         Throw();
-        //FlightTimeController();
     }
 
     void Start()
@@ -73,6 +72,11 @@ public class BallManager : MonoBehaviour
 
     void Update()
     {
+        if (transform.position.y<0.8f)
+        {
+            EventManager.StartLineRenderer(transform.position, CalculateH(), TargetPos());
+        }
+        CalculateH();
         if (Input.GetMouseButtonDown(0) && canJump)
         {
             transform.GetComponent<Rigidbody>().drag = 0;
@@ -83,7 +87,6 @@ public class BallManager : MonoBehaviour
 
         if (Input.GetMouseButtonUp(0))
         {
-            EventManager.PositionAdjustment();
             canJump = false;
         }
 
@@ -91,11 +94,9 @@ public class BallManager : MonoBehaviour
         {
             positionControl= transform.position;
             transform.GetComponent<Rigidbody>().drag = 50;
-            //transform.GetComponent<Rigidbody>().velocity = new Vector3(0, 0, 0);
             transform.position = positionControl;
-            EventManager.StartLineRenderer();
-            //transform.GetComponent<Rigidbody>().drag = 0;
             canJump = true;
+            cam.transform.position = transform.position - distanceToCamera;
         }
 
         if (debugPath)
@@ -112,7 +113,7 @@ public class BallManager : MonoBehaviour
         }
     }
 
-    void TargetPos()
+    Vector3 TargetPos()
     {
         RaycastHit hit;
         Ray r = Camera.main.ScreenPointToRay(Input.mousePosition);
@@ -121,6 +122,7 @@ public class BallManager : MonoBehaviour
             Vector3 objectHit = hit.point;
             target.transform.position = new Vector3(objectHit.x, 0.5f, objectHit.z);
         }
+        return target.transform.position;
     }
 
     void Throw()
@@ -136,10 +138,16 @@ public class BallManager : MonoBehaviour
         if (constantHMax)
         {
             EventManager.ConstantHMax();
+            EventManager.NotConstantTime();
         }
-        else
+        else if (constantFlightTime && !constantHMax)
         {
-            height = Mathf.Abs(target.transform.position.z - transform.position.z) / 2;
+            height = -gravity * (time / 2) * (time / 2);
+        }
+        else if(!constantFlightTime && !constantHMax)
+        {
+            EventManager.NotConstantTime();
+            height = Mathf.Abs(target.transform.position.z - transform.position.z);
         }
         return height;
     }
@@ -147,17 +155,11 @@ public class BallManager : MonoBehaviour
 
     ThrowhData CalculateThrowhData()
     {
-        //displacementY = target.transform.position.y - transform.position.y;
-        //displacementXZ = new Vector3(target.transform.position.x - transform.position.x, 0, target.transform.position.z - transform.position.z);
-        //time = FlightTimeController();
-        //velocityY = Vector3.up * Mathf.Sqrt(-2 * gravity * CalculateH());
-        //velocityXZ = displacementXZ / time;
-
         if (constantFlightTime)
         {
             displacementY = target.transform.position.y - transform.position.y;
             displacementXZ = new Vector3(target.transform.position.x - transform.position.x, 0, target.transform.position.z - transform.position.z);
-            height = -gravity * (time / 2) * (time / 2);
+            height = CalculateH();
             velocityY = Vector3.up * -gravity * (time / 2);
             velocityXZ = displacementXZ / time;
         }
@@ -166,10 +168,9 @@ public class BallManager : MonoBehaviour
             displacementY = target.transform.position.y - transform.position.y;
             displacementXZ = new Vector3(target.transform.position.x - transform.position.x, 0, target.transform.position.z - transform.position.z);
             time = Mathf.Sqrt(-2 * CalculateH() / gravity) + Mathf.Sqrt(2 * (displacementY - CalculateH()) / gravity);
-            velocityY = Vector3.up * Mathf.Sqrt(-2 * gravity * CalculateH());
+            velocityY = Vector3.up * Mathf.Sqrt(-2 * gravity * CalculateH()); /*Vector3.up * -gravity * (time / 2);*/
             velocityXZ = displacementXZ / time;
         }
-
         return new ThrowhData(velocityXZ + velocityY * -Mathf.Sign(gravity), time);
     }
 

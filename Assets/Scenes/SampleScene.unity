@@ -434,7 +434,7 @@ PrefabInstance:
       objectReference: {fileID: 963194225}
     - target: {fileID: 3032571591232844823, guid: d6086ef8e90eea24b9bfc158cd69a764, type: 3}
       propertyPath: time
-      value: 10
+      value: 5
       objectReference: {fileID: 0}
     - target: {fileID: 3032571591232844823, guid: d6086ef8e90eea24b9bfc158cd69a764, type: 3}
       propertyPath: height
@@ -450,11 +450,11 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 3032571591232844823, guid: d6086ef8e90eea24b9bfc158cd69a764, type: 3}
       propertyPath: constantHMax
-      value: 0
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 3032571591232844823, guid: d6086ef8e90eea24b9bfc158cd69a764, type: 3}
       propertyPath: constantFlightTime
-      value: 1
+      value: 0
       objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: d6086ef8e90eea24b9bfc158cd69a764, type: 3}

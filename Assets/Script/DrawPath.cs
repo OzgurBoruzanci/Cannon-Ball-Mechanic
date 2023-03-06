@@ -57,12 +57,6 @@ public class DrawPath : MonoBehaviour
         lineRenderer = GetComponent<LineRenderer>();
     }
 
-    void Update()
-    {
-        
-        
-    }
-
     Vector3 CalculateHMaxPoint(Vector3 startPoint,Vector3 endPoint,float height)
     {
         hMaxPoint.y = height;
@@ -73,6 +67,7 @@ public class DrawPath : MonoBehaviour
 
     void DrawQuadraticBezierCurve(Vector3 point0, Vector3 point1, Vector3 point2)
     {
+        point2.y = 0;
         if (notConstantTime)
         {
             point1.y *= 2;
@@ -85,7 +80,8 @@ public class DrawPath : MonoBehaviour
         {
             B = (1 - t) * (1 - t) * point0 + 2 * (1 - t) * t * point1 + t * t * point2;
             lineRenderer.SetPosition(i, B);
-            t += (1 / (float)lineRenderer.positionCount);
+            t += (2 / (float)lineRenderer.positionCount);
+            Debug.Log(B+" "+i+" "+t+"  y point "+point1+"  end  "+point2);
         }
     }
 }

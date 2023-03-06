@@ -1,12 +1,17 @@
 using DG.Tweening;
+using Newtonsoft.Json.Linq;
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Diagnostics;
 using UnityEngine;
 using UnityEngine.UIElements;
 
 public class BallManager : MonoBehaviour
 {
+    public enum constantValueControl { constantHMax, constantFlightTime, notConstant };
+    public constantValueControl constantValue;
+
     public GameObject cam;
     public GameObject target;
     Vector3 distanceToCamera;
@@ -15,16 +20,13 @@ public class BallManager : MonoBehaviour
     Vector3 velocityY;
     Vector3 velocityXZ;
 
-
     public float height;
     public float time;
     float gravity = -18;
     float displacementY;
     
-
-    public bool debugPath;
-    public bool constantHMax;
-    public bool constantFlightTime;
+    bool constantHMax;
+    bool constantFlightTime;
     bool canJump=true;
 
     private void OnEnable()
@@ -66,7 +68,6 @@ public class BallManager : MonoBehaviour
         distanceToCamera = transform.position - cam.transform.position;
         positionControl = transform.position;
         transform.GetComponent<Rigidbody>().useGravity = false;
-        DrawPath();
 
     }
 
@@ -98,19 +99,27 @@ public class BallManager : MonoBehaviour
             canJump = true;
             cam.transform.position = transform.position - distanceToCamera;
         }
+        ConstantValueChoice();
+    }
 
-        if (debugPath)
+    void ConstantValueChoice()
+    {
+        switch (constantValue)
         {
-            DrawPath();
+            case constantValueControl.constantHMax:
+                constantHMax = true;
+                constantFlightTime = false;
+                break;
+            case constantValueControl.constantFlightTime:
+                constantFlightTime = true;
+                constantHMax = false;
+                break;
+            case constantValueControl.notConstant:
+                constantFlightTime = false;
+                constantHMax = false;
+                break;
         }
-        if (constantHMax)
-        {
-            constantFlightTime = false;
-        }
-        if (constantFlightTime)
-        {
-            constantHMax = false;
-        }
+
     }
 
     Vector3 TargetPos()
@@ -168,27 +177,12 @@ public class BallManager : MonoBehaviour
             displacementY = target.transform.position.y - transform.position.y;
             displacementXZ = new Vector3(target.transform.position.x - transform.position.x, 0, target.transform.position.z - transform.position.z);
             time = Mathf.Sqrt(-2 * CalculateH() / gravity) + Mathf.Sqrt(2 * (displacementY - CalculateH()) / gravity);
-            velocityY = Vector3.up * Mathf.Sqrt(-2 * gravity * CalculateH()); /*Vector3.up * -gravity * (time / 2);*/
+            velocityY = Vector3.up * Mathf.Sqrt(-2 * gravity * CalculateH());
             velocityXZ = displacementXZ / time;
         }
         return new ThrowhData(velocityXZ + velocityY * -Mathf.Sign(gravity), time);
     }
 
-    void DrawPath()
-    {
-        ThrowhData throwhData = CalculateThrowhData();
-        Vector3 previousDrawPoint = transform.position;
-
-        int resolution = 30;
-        for (int i = 1; i <= resolution; i++)
-        {
-            float simulationTime = i / (float)resolution * throwhData.timeToTarget;
-            Vector3 displacement = throwhData.initialVelocity * simulationTime + Vector3.up * gravity * simulationTime * simulationTime / 2f;
-            Vector3 drawPoint = transform.position + displacement;
-            Debug.DrawLine(previousDrawPoint, drawPoint, Color.green);
-            previousDrawPoint = drawPoint;
-        }
-    }
 
     struct ThrowhData
     {

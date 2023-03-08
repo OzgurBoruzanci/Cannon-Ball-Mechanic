@@ -6,6 +6,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using UnityEngine;
 using UnityEngine.UIElements;
+using Debug = UnityEngine.Debug;
 
 public class BallManager : MonoBehaviour
 {
@@ -75,9 +76,9 @@ public class BallManager : MonoBehaviour
     {
         if (transform.position.y<0.8f)
         {
-            EventManager.StartLineRenderer(transform.position, CalculateH(), TargetPos());
+            EventManager.StartLineRenderer(transform.position, CalculateH(time), TargetPos());
         }
-        CalculateH();
+        CalculateH(time);
         if (Input.GetMouseButtonDown(0) && canJump)
         {
             transform.GetComponent<Rigidbody>().drag = 0;
@@ -141,8 +142,15 @@ public class BallManager : MonoBehaviour
         transform.GetComponent<Rigidbody>().velocity = CalculateThrowhData().initialVelocity;
 
     }
+    float CalcuteFlightTimeHeight(float time)
+    {
+        velocityY = Vector3.up * -gravity * (time / 2);
+        height = (Vector3.Magnitude(velocityY) * Vector3.Magnitude(velocityY)) / (2 * -gravity);
 
-    float CalculateH()
+        return height;
+    }
+
+    float CalculateH(float time)
     {
         if (constantHMax)
         {
@@ -151,7 +159,7 @@ public class BallManager : MonoBehaviour
         }
         else if (constantFlightTime && !constantHMax)
         {
-            height = -gravity * (time / 2) * (time / 2);
+            height = /*-gravity * (time / 2) * (time / 2);*/ CalcuteFlightTimeHeight(time);
         }
         else if(!constantFlightTime && !constantHMax)
         {
@@ -161,6 +169,12 @@ public class BallManager : MonoBehaviour
         return height;
     }
 
+    float CalcuteFlightTime()
+    {
+        time = Mathf.Sqrt(-2 * CalculateH(time) / gravity) + Mathf.Sqrt(2 * (displacementY - CalculateH(time)) / gravity);
+
+        return time;
+    }
 
     ThrowhData CalculateThrowhData()
     {
@@ -168,16 +182,17 @@ public class BallManager : MonoBehaviour
         {
             displacementY = target.transform.position.y - transform.position.y;
             displacementXZ = new Vector3(target.transform.position.x - transform.position.x, 0, target.transform.position.z - transform.position.z);
-            height = CalculateH();
+            height = CalculateH(time);
             velocityY = Vector3.up * -gravity * (time / 2);
             velocityXZ = displacementXZ / time;
+            Debug.Log(Vector3.Magnitude((velocityY) * Vector3.Magnitude(velocityY)) / (2 * -gravity));
         }
         else
         {
             displacementY = target.transform.position.y - transform.position.y;
             displacementXZ = new Vector3(target.transform.position.x - transform.position.x, 0, target.transform.position.z - transform.position.z);
-            time = Mathf.Sqrt(-2 * CalculateH() / gravity) + Mathf.Sqrt(2 * (displacementY - CalculateH()) / gravity);
-            velocityY = Vector3.up * Mathf.Sqrt(-2 * gravity * CalculateH());
+            time = CalcuteFlightTime();
+            velocityY = Vector3.up * Mathf.Sqrt(-2 * gravity * CalculateH(time));
             velocityXZ = displacementXZ / time;
         }
         return new ThrowhData(velocityXZ + velocityY * -Mathf.Sign(gravity), time);

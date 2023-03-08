@@ -80,8 +80,8 @@ public class DrawPath : MonoBehaviour
         {
             B = (1 - t) * (1 - t) * point0 + 2 * (1 - t) * t * point1 + t * t * point2;
             lineRenderer.SetPosition(i, B);
-            t += (2 / (float)lineRenderer.positionCount);
-            Debug.Log(B+" "+i+" "+t+"  y point "+point1+"  end  "+point2);
+            t += (1 / (float)lineRenderer.positionCount);
         }
+        lineRenderer.SetPosition(lineRenderer.positionCount-1, point2);
     }
 }

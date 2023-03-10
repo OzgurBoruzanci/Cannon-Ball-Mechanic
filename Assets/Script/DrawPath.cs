@@ -8,7 +8,6 @@ public class DrawPath : MonoBehaviour
     private LineRenderer lineRenderer;
     Vector3 startPoint;
     Vector3 hMaxPoint;
-    bool notConstantTime = false;
 
     public bool constantHMax=true;
 
@@ -16,21 +15,15 @@ public class DrawPath : MonoBehaviour
     {
         EventManager.StopLineRenderer += StopLineRenderer;
         EventManager.StartLineRenderer += StartLineRenderer;
-        EventManager.NotConstantTime += NotConstantTime;
     }
     private void OnDisable()
     {
         EventManager.StopLineRenderer -= StopLineRenderer;
         EventManager.StartLineRenderer -= StartLineRenderer;
-        EventManager.NotConstantTime -= NotConstantTime;
     }
     void StopLineRenderer()
     {
         lineRenderer.enabled= false;
-    }
-    void NotConstantTime()
-    {
-        notConstantTime=true;
     }
 
 
@@ -38,6 +31,7 @@ public class DrawPath : MonoBehaviour
     {
         lineRenderer.enabled= true;
         DrawQuadraticBezierCurve(vec, CalculateHMaxPoint(vec, endVec, height), endVec);
+        Debug.Log("gelen " + height);
     }
 
 
@@ -58,10 +52,9 @@ public class DrawPath : MonoBehaviour
     void DrawQuadraticBezierCurve(Vector3 point0, Vector3 point1, Vector3 point2)
     {
         point2.y = 0;
-        if (notConstantTime)
-        {
-            point1.y *= 2;
-        }
+        Debug.Log("metotda " + point1);
+        point1.y *= 2;
+
         lineRenderer.positionCount = 200;
         float t = 0f;
         Vector3 B = startPoint;

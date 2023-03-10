@@ -27,7 +27,6 @@ public class GameController : MonoBehaviour
     {
         EventManager.StopLineRenderer += StopLineRenderer;
         EventManager.StartLineRenderer += StartLineRenderer;
-        EventManager.NotConstantTime += NotConstantTime;
         EventManager.JumpControl += JumpControl;
         EventManager.CreateBall += CreateBall;
     }
@@ -36,7 +35,6 @@ public class GameController : MonoBehaviour
         EventManager.CreateBall -= CreateBall;
         EventManager.StopLineRenderer -= StopLineRenderer;
         EventManager.StartLineRenderer -= StartLineRenderer;
-        EventManager.NotConstantTime -= NotConstantTime;
         EventManager.JumpControl -= JumpControl;
     }
     void CreateBall()
@@ -51,10 +49,7 @@ public class GameController : MonoBehaviour
     {
 
     }
-    void NotConstantTime()
-    {
 
-    }
 
     void StartLineRenderer(Vector3 startVec, float height, Vector3 endVec)
     {
@@ -76,8 +71,7 @@ public class GameController : MonoBehaviour
         if (Input.GetMouseButtonUp(0))
         {
             Throw();
-            //CreateCannonBall();
-            EventManager.StopLineRenderer();
+            //EventManager.StopLineRenderer();
             EventManager.JumpControl();
         }
 
@@ -129,7 +123,6 @@ public class GameController : MonoBehaviour
         Physics.gravity = Vector3.up * gravity;
         ballClone.transform.GetComponent<Rigidbody>().useGravity = true;
         ballClone.transform.GetComponent<Rigidbody>().velocity = CalculateThrowhData().initialVelocity;
-        Debug.Log(CalculateThrowhData().initialVelocity);
     }
     float CalcuteFlightTimeHeight(float time)
     {
@@ -143,7 +136,7 @@ public class GameController : MonoBehaviour
     {
         if (constantHMax)
         {
-            EventManager.NotConstantTime();
+
         }
         else if (constantFlightTime && !constantHMax)
         {
@@ -151,7 +144,6 @@ public class GameController : MonoBehaviour
         }
         else if (!constantFlightTime && !constantHMax)
         {
-            EventManager.NotConstantTime();
             height = Mathf.Abs(target.transform.position.z - transform.position.z);
         }
         return height;
@@ -182,7 +174,7 @@ public class GameController : MonoBehaviour
             time = CalcuteFlightTime();
             velocityY = Vector3.up * Mathf.Sqrt(-2 * gravity * CalculateH(time));
             velocityXZ = displacementXZ / time;
-            Debug.Log(velocityXZ + velocityY * -Mathf.Sign(gravity));
+
         }
         return new ThrowhData(velocityXZ + velocityY * -Mathf.Sign(gravity));
     }

@@ -13,7 +13,8 @@ GameObject:
   - component: {fileID: 3032571591232844818}
   - component: {fileID: 3032571591232844821}
   - component: {fileID: 3032571591232844820}
-  - component: {fileID: 3032571591232844823}
+  - component: {fileID: 4004125422623729185}
+  - component: {fileID: 6185661670015699890}
   m_Layer: 0
   m_Name: Ball
   m_TagString: Untagged
@@ -108,12 +109,28 @@ Rigidbody:
   m_Mass: 1
   m_Drag: 0
   m_AngularDrag: 0.05
-  m_UseGravity: 1
+  m_UseGravity: 0
   m_IsKinematic: 0
   m_Interpolate: 0
   m_Constraints: 0
   m_CollisionDetection: 0
---- !u!114 &3032571591232844823
+--- !u!114 &4004125422623729185
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3032571591232844822}
+  m_Enabled: 0
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 9968dbc4c84ff9c428af711b81b43ce1, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  constantValue: 0
+  target: {fileID: 6680551274299882273, guid: baefd4c81af2588419befcda6704fac5, type: 3}
+  height: 0
+  time: 0
+--- !u!114 &6185661670015699890
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -122,9 +139,6 @@ MonoBehaviour:
   m_GameObject: {fileID: 3032571591232844822}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 9968dbc4c84ff9c428af711b81b43ce1, type: 3}
+  m_Script: {fileID: 11500000, guid: e9bddefed0ff53f4f8aaa84c57c1d864, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  cam: {fileID: 545895637269503211, guid: e0bef575a3677a247959b36c0d9f947d, type: 3}
-  target: {fileID: 6680551274299882273, guid: baefd4c81af2588419befcda6704fac5, type: 3}
-  debugPath: 1

@@ -8,49 +8,39 @@ public class DrawPath : MonoBehaviour
     private LineRenderer lineRenderer;
     Vector3 startPoint;
     Vector3 hMaxPoint;
-    bool lineRendererBool=false;
     bool notConstantTime = false;
 
     public bool constantHMax=true;
 
     private void OnEnable()
     {
-        EventManager.PositionAdjustment += PositionAdjustment;
+        EventManager.StopLineRenderer += StopLineRenderer;
         EventManager.StartLineRenderer += StartLineRenderer;
-        EventManager.ConstantHMax += ConstantHMax;
         EventManager.NotConstantTime += NotConstantTime;
     }
     private void OnDisable()
     {
-        EventManager.PositionAdjustment -= PositionAdjustment;
+        EventManager.StopLineRenderer -= StopLineRenderer;
         EventManager.StartLineRenderer -= StartLineRenderer;
-        EventManager.ConstantHMax -= ConstantHMax;
         EventManager.NotConstantTime -= NotConstantTime;
+    }
+    void StopLineRenderer()
+    {
+        lineRenderer.enabled= false;
     }
     void NotConstantTime()
     {
         notConstantTime=true;
     }
 
-    void ConstantHMax()
-    {
-        constantHMax= true;
-    }
 
     void StartLineRenderer(Vector3 vec,float height,Vector3 endVec)
     {
-        if (!Input.GetMouseButtonDown(0))
-        {
-            DrawQuadraticBezierCurve(vec, CalculateHMaxPoint(vec, endVec, height), endVec);
-            lineRendererBool = true;
-        }
+        lineRenderer.enabled= true;
+        DrawQuadraticBezierCurve(vec, CalculateHMaxPoint(vec, endVec, height), endVec);
     }
 
-    void PositionAdjustment()
-    {
-        lineRendererBool= false;
-      
-    }
+
 
     void Start()
     {

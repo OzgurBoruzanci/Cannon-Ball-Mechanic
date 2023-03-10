@@ -1,19 +1,16 @@
-using DG.Tweening;
-using Newtonsoft.Json.Linq;
-using System;
 using System.Collections;
 using System.Collections.Generic;
-using System.Diagnostics;
 using UnityEngine;
-using UnityEngine.UIElements;
-using Debug = UnityEngine.Debug;
+using static UnityEngine.GraphicsBuffer;
 
-public class BallManager : MonoBehaviour
+public class GameController : MonoBehaviour
 {
     public enum constantValueControl { constantHMax, constantFlightTime, notConstant };
     public constantValueControl constantValue;
 
+    public GameObject ball;
     public GameObject target;
+    GameObject ballClone;
     Vector3 displacementXZ;
     Vector3 velocityY;
     Vector3 velocityXZ;
@@ -22,22 +19,33 @@ public class BallManager : MonoBehaviour
     public float time;
     float gravity = -18;
     float displacementY;
-    
+
     bool constantHMax;
     bool constantFlightTime;
-    bool canJump=true;
 
     private void OnEnable()
     {
         EventManager.StopLineRenderer += StopLineRenderer;
         EventManager.StartLineRenderer += StartLineRenderer;
         EventManager.NotConstantTime += NotConstantTime;
+        EventManager.JumpControl += JumpControl;
+        EventManager.CreateBall += CreateBall;
     }
     private void OnDisable()
     {
+        EventManager.CreateBall -= CreateBall;
         EventManager.StopLineRenderer -= StopLineRenderer;
         EventManager.StartLineRenderer -= StartLineRenderer;
         EventManager.NotConstantTime -= NotConstantTime;
+        EventManager.JumpControl -= JumpControl;
+    }
+    void CreateBall()
+    {
+        CreateCannonBall();
+    }
+    void JumpControl()
+    {
+
     }
     void StopLineRenderer()
     {
@@ -48,14 +56,14 @@ public class BallManager : MonoBehaviour
 
     }
 
-    void StartLineRenderer(Vector3 startVec,float height,Vector3 endVec)
+    void StartLineRenderer(Vector3 startVec, float height, Vector3 endVec)
     {
-        
+
     }
 
     void Start()
     {
-        transform.GetComponent<Rigidbody>().useGravity = false;
+        CreateCannonBall();
     }
 
     void Update()
@@ -64,17 +72,23 @@ public class BallManager : MonoBehaviour
         {
             TargetPos();
             EventManager.StartLineRenderer(transform.position, CalculateH(time), TargetPos());
-            canJump=true;
         }
         if (Input.GetMouseButtonUp(0))
         {
-            transform.GetComponent<Rigidbody>().drag = 0;
             Throw();
+            //CreateCannonBall();
             EventManager.StopLineRenderer();
-            canJump = false;
+            EventManager.JumpControl();
         }
 
         ConstantValueChoice();
+    }
+    
+    void CreateCannonBall()
+    {
+        ballClone = Instantiate(ball, transform.position, Quaternion.identity);
+        ballClone.transform.GetComponent<Rigidbody>().useGravity = false;
+
     }
 
     void ConstantValueChoice()
@@ -96,14 +110,7 @@ public class BallManager : MonoBehaviour
         }
 
     }
-    private void OnCollisionEnter(Collision collision)
-    {
-        if (collision.transform.tag=="Plane" && !canJump)
-        {
-            transform.GetComponent<Rigidbody>().velocity = new Vector3(0, 0, 0);
-            transform.GetComponent<Rigidbody>().drag = 50;
-        }
-    }
+    
 
     Vector3 TargetPos()
     {
@@ -120,9 +127,9 @@ public class BallManager : MonoBehaviour
     void Throw()
     {
         Physics.gravity = Vector3.up * gravity;
-        transform.GetComponent<Rigidbody>().useGravity = true;
-        transform.GetComponent<Rigidbody>().velocity = CalculateThrowhData().initialVelocity;
-
+        ballClone.transform.GetComponent<Rigidbody>().useGravity = true;
+        ballClone.transform.GetComponent<Rigidbody>().velocity = CalculateThrowhData().initialVelocity;
+        Debug.Log(CalculateThrowhData().initialVelocity);
     }
     float CalcuteFlightTimeHeight(float time)
     {
@@ -142,7 +149,7 @@ public class BallManager : MonoBehaviour
         {
             height = /*-gravity * (time / 2) * (time / 2);*/ CalcuteFlightTimeHeight(time);
         }
-        else if(!constantFlightTime && !constantHMax)
+        else if (!constantFlightTime && !constantHMax)
         {
             EventManager.NotConstantTime();
             height = Mathf.Abs(target.transform.position.z - transform.position.z);
@@ -175,20 +182,19 @@ public class BallManager : MonoBehaviour
             time = CalcuteFlightTime();
             velocityY = Vector3.up * Mathf.Sqrt(-2 * gravity * CalculateH(time));
             velocityXZ = displacementXZ / time;
+            Debug.Log(velocityXZ + velocityY * -Mathf.Sign(gravity));
         }
-        return new ThrowhData(velocityXZ + velocityY * -Mathf.Sign(gravity), time);
+        return new ThrowhData(velocityXZ + velocityY * -Mathf.Sign(gravity));
     }
 
 
     struct ThrowhData
     {
         public readonly Vector3 initialVelocity;
-        public readonly float timeToTarget;
 
-        public ThrowhData(Vector3 initialVelocity, float timeToTarget)
+        public ThrowhData(Vector3 initialVelocity)
         {
             this.initialVelocity = initialVelocity;
-            this.timeToTarget = timeToTarget;
         }
 
     }

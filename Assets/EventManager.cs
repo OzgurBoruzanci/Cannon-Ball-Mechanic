@@ -4,9 +4,9 @@ using UnityEngine;
 
 public static class EventManager
 {
-
-    public static Action PositionAdjustment;
     public static Action<Vector3,float,Vector3> StartLineRenderer;
-    public static Action ConstantHMax;
     public static Action NotConstantTime;
+    public static Action StopLineRenderer;
+    public static Action JumpControl;
+    public static Action CreateBall;
 }

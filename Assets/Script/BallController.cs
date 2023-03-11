@@ -10,16 +10,10 @@ public class BallController : MonoBehaviour
     private void OnEnable()
     {
         EventManager.JumpControl += JumpControl;
-        EventManager.CreateBall += CreateBall;
     }
     private void OnDisable()
     {
-        EventManager.CreateBall -= CreateBall;
         EventManager.JumpControl -= JumpControl;
-    }
-    void CreateBall()
-    {
-
     }
     void JumpControl()
     {
@@ -32,8 +26,7 @@ public class BallController : MonoBehaviour
             collidedPlane= true;
             if (collidedPlane)
             {
-                transform.GetComponent<Rigidbody>().velocity = new Vector3(0, 0, 0);
-                transform.GetComponent<Rigidbody>().drag = 50;
+                transform.GetComponent<Rigidbody>().isKinematic= true;
                 EventManager.CreateBall();
             }
         }

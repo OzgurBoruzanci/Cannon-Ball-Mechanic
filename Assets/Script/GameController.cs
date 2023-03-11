@@ -25,36 +25,17 @@ public class GameController : MonoBehaviour
 
     private void OnEnable()
     {
-        EventManager.StopLineRenderer += StopLineRenderer;
-        EventManager.StartLineRenderer += StartLineRenderer;
-        EventManager.JumpControl += JumpControl;
         EventManager.CreateBall += CreateBall;
     }
     private void OnDisable()
     {
         EventManager.CreateBall -= CreateBall;
-        EventManager.StopLineRenderer -= StopLineRenderer;
-        EventManager.StartLineRenderer -= StartLineRenderer;
-        EventManager.JumpControl -= JumpControl;
     }
     void CreateBall()
     {
         CreateCannonBall();
     }
-    void JumpControl()
-    {
 
-    }
-    void StopLineRenderer()
-    {
-
-    }
-
-
-    void StartLineRenderer(Vector3 startVec, float height, Vector3 endVec)
-    {
-
-    }
 
     void Start()
     {
@@ -65,7 +46,7 @@ public class GameController : MonoBehaviour
     {
         if (Input.GetMouseButton(0))
         {
-            TargetPos();
+
             EventManager.StartLineRenderer(transform.position, CalculateH(time), TargetPos());
         }
         if (Input.GetMouseButtonUp(0))

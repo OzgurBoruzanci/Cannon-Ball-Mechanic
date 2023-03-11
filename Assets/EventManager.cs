@@ -8,4 +8,5 @@ public static class EventManager
     public static Action StopLineRenderer;
     public static Action JumpControl;
     public static Action CreateBall;
+    public static Action NotConstantTime;
 }
